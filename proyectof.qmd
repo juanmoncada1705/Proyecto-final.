@@ -1,0 +1,328 @@
+---
+title: "Capacidad de Absorción: Evaluación de Materiales, Tamaños y Líquidos"
+author: "Juliana Agudelo, Juan Pablo Moncada y Samuel Muñoz"
+lang: es
+theme: lumen
+format: 
+  html: 
+    toc: true
+    toc-location: left
+    number-sections: true
+editor: visual 
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+## RESUMEN
+
+El experimento de capacidad de absorcion que realizamos busca determinar la cantidad de líquido absorbido por diferentes materiales de absorción (hojas de papel, papel de cocina y servilletas) bajo distintas combinaciones de tamaño (10x10 cm, 15x15 cm y 20x20 cm) y tipo de líquido (agua, aceite y vinagre). ). Este diseño factorial permite evaluar cómo interactúan las propiedades de los materiales, los tamaños y los líquidos en la capacidad de absorción, con aplicaciones prácticas en la selección de materiales para procesos industriales y consumo doméstico.
+
+## Metodología
+
+Para la elaboración de este proyecto se precisó de aceite, agua, probeta, vinagre, regla, tijeras, papel de cocina, servilletas y hojas de papel.
+
+![Imagen 1: Materiales](https://raw.githubusercontent.com/juanmoncada1705/Proyecto-final./main/2024-11-26%20at%205.02.13%20PM.jpeg)
+
+La metodología para la recolección de datos fue simple, utilizar la probeta como medidor de la cantidad de líquido que podia absorver cada sujeto, en una bolsa o contenedor cualquiera, se vierten los liquidos, posteriormente se remojarian cada uno de los materiales para ser exprimidos en la probeta y así cuantificar la cantidad de mililitros absorvidos.
+
+![Imagen 2: Uso de probeta](https://raw.githubusercontent.com/juanmoncada1705/Proyecto-final./main/Image%202024-11-26%20at%205.01.48%20PM.jpeg)
+
+![Imagen 3: Probeta casera](https://raw.githubusercontent.com/juanmoncada1705/Proyecto-final./main/Image%202024-11-26%20at%205.02.07%20PM.jpeg)
+
+El material se cortó en areas diferentes, 5x5cm, 10x10cm y 20x20cm haciendo uso de las tijeras y regla.
+
+![Imagen 4: Ajuste de medidas](https://raw.githubusercontent.com/juanmoncada1705/Proyecto-final./main/Image%202024-11-26%20at%205.02.02%20PM.jpeg)
+
+## OBJETIVOS EXPERIMENTALES
+
+1.  Optimizar la selección de materiales absorbentes: Identificar qué material y tamaño maximizan la capacidad de absorción, teniendo en cuenta el tipo de líquido, para mejorar la eficiencia en procesos de limpieza o contención en contextos industriales.
+
+2.  Analizar la interacción material-líquido: Evaluar cómo las propiedades químicas de los líquidos afectan la capacidad de absorción de los diferentes materiales, para diseñar productos que respondan mejor a aplicaciones específicas en la industria alimentaria o fabricante.
+
+3.  Estudiar la relación tamaño-capacidad: Determinar si el tamaño de los materiales tiene una relación proporcional con la cantidad de líquido absorbido, contribuyendo a decisiones sobre diseño de productos y optimización de costos en el sector industrial.
+
+## VARIABLES
+
+El conjunto de datos que se analizaron corresponde a 81 observaciones y 4 variables, de las cuales 2 son cualitativas y 2 cuantitativas. La @tbl-Tabla1 presenta la clasificacion de las variables.
+
+| Variable       | Tipo         |
+|----------------|--------------|
+| absorbida (ml) | Cuantitativo |
+| tamaño(cm2)    | Cualitativo  |
+| material       | Cualitativo  |
+| liquido        | Cualitativo  |
+
+: Clasificacion de variables {#tbl-Tabla1}
+
+## DESCRIPCION DEL EXPERIMENTO
+
+Con el fin de identificar cómo el material, el tamaño y el tipo de líquido afectan la cantidad de liquido absorbida, se llevo a cabo el presente experimento, el cual, consiste en medir la cantidad de líquido absorbido por diferentes combinaciones de materiales (hojas de papel, papel de cocina y servilletas), areas (25 cm2, 100 cm2 y 400 cm2) y tipos de líquidos (agua, aceite y vinagre). Cada combinación constituye una unidad experimental, lo que da un total de 27 tratamientos (3×3×3). Para cada tratamiento se realizarán 3 réplicas, obteniendo un total de 81 observaciones. El procedimiento comienza con la preparación de los materiales cortados en los tamaños indicados y la disposición de los líquidos. Cada unidad experimental se sumerge en el líquido correspondiente durante un tiempo controlado y se mide la cantidad absorbida después de la inmersión, esto se hace por medio de una probeta . La aleatorización se realiza asignando al azar el orden de los tratamientos y asegurando que las condiciones experimentales sean consistentes para minimizar sesgos y fuentes de variación externas.
+
+![Diagrama 1](https://raw.githubusercontent.com/juanmoncada1705/Proyecto-final./main/WhatsApp%20Image%202024-11-26%20at%2010.18.48%20PM.jpeg)
+
+## ANALISIS EXPLORATORIO
+
+```{r}
+library(ggplot2)
+library(gplots)
+library(pwr)
+library(lmtest)
+library(car)
+library(agricolae)
+library(readr)
+library(readxl)
+library(httr)
+library(dplyr)
+library(nortest)
+
+url <- "https://raw.githubusercontent.com/juanmoncada1705/Proyecto-final./main/test1.xlsx"
+temp_file <- tempfile(fileext = ".xlsx")
+GET(url, write_disk(temp_file, overwrite = TRUE))
+datos <- read_excel(temp_file)
+
+
+```
+
+```{r}
+
+attach(datos)
+datos$area<-as.factor(datos$area)
+datos$material<-as.factor(datos$material)
+datos$liquido<-as.factor(datos$liquido)
+
+```
+
+### Relacion entre Area del material y mililitros absorbidos
+
+```{r}
+boxplot(mililitros~area,data=datos)
+```
+
+A partir del grafico podemos analizar la ralacion entre el area del material y la cantidad en mililitros absorbida por este. Para un area de 25cm2 hay muy poca variabilidad en los valores de absorción, que se mantienen cercanos a 0. Esto indica que los materiales de área pequeña no absorben una cantidad significativa de líquido.Para un area de 100cm2 se observa un incremento en la cantidad de mililitros absorbidos en comparación con el área de 25, la mediana se encuentra aproximadamente en 7 mililitros y existe mayor dispersión de los datos. Finalmente para el area de 400cm2 presenta la mayor cantidad de líquido absorbido, con una mediana en torno a los 15 mililitros, existe más variabilidad en la absorción, y se identifica un valor atípico que excede los 35 mililitros.
+
+### Relacion entre el tipo de liquido y mililitros absorbidos
+
+```{r}
+boxplot(mililitros~liquido,data=datos)
+```
+
+En cuanto a la relación entre el tipo de líquido y la cantidad en mililitros absorbidos, podemos observar que ara el caso del aceite, se presenta una variabilidad considerable; Sin embargo, la mayor parte de los datos se encuentra entre 0 ml y 7 ml, con una mediana cercana a 3 ml. En el caso del agua, la variabilidad aumenta ligeramente y presenta una mediana en torno a 5 ml. Para este líquido, se identifica un valor atípico que excede los 35 ml. Por último, el vinagre es el líquido con mayor variabilidad. La mayoría de sus datos se encuentra en un rango entre 0 ml y 12 ml, con una mediana cercana a 6 ml. También se identifican unos valores atípicos para el vinagre, que exceden los 27 ml.
+
+### Relacion entre el tipo de material y mililitros abosrbidos
+
+```{r}
+boxplot(mililitros~material,data=datos)
+```
+
+A partir del gráfico, podemos analizar la relación entre el tipo de material y la cantidad en mililitros absorbidos por este. En el caso de la hoja de papel, hay muy poca variabilidad en los valores de absorción, los cuales se mantienen cercanos a 0. Esto indica que este tipo de material no absorbe una cantidad significativa de líquido. Sin embargo, presenta algunos valores atípicos alrededor de los 5 ml. Para el papel de cocina, se observa una mayor variabilidad. La mayor parte de sus datos se encuentra en un rango entre 2 ml y 11 ml, con una mediana cercana a los 6 ml. Por último, para las servilletas, podemos observar que es el material que presenta mayor variabilidad en sus datos, y su mediana es mucho más alta, encontrándose en torno a los 10 ml.
+
+### Gráficos de Interacción
+
+La capacidad de absorción depende de una interacción significativa entre el material, el tipo de líquido y el volumen disponible. El material servilleta es el más absorbente, especialmente con vinagre, mientras que hoja de papel tiene la menor capacidad de absorción en todos los casos. Al incrementar el tamaño del material de absorción, la cantidad de mililitros aumenta de forma consistente, con variaciones según las propiedades del material y del líquido, evidenciando que el material y el tipo de líquido determinan la eficiencia en la absorción.
+
+```{r}
+par(mfrow=c(1,3))
+interaction.plot(liquido, material, mililitros, 
+                 xlab="liquido", ylab="cap de absorción")
+interaction.plot(area, liquido, mililitros, 
+                 xlab="area", ylab="cap de absorción")
+interaction.plot(area, material, mililitros, 
+                 xlab="area", ylab="cap de absorción")
+
+```
+
+## MODELO DE REGREISÓN
+
+A continuación se presenta el modelo anova para este estudio, durante la prueba de supuestos notamos que el modelo no presentaba normalidad, independencia y homocedasticidad, es por esto que hicimos una transformación en la base de datos haciendo uso de la función "Log", de esta forma se logró cumplir los supuestos previamente mencionado
+
+```{r}
+modelo<- aov(mililitros~liquido*material*area,data = datos)
+summary(modelo)
+```
+
+### TRANSFORMACIÓN DE LA VARIABLE MILILITROS
+
+```{r}
+datos$mililitros_log <- log(datos$mililitros)
+modelo_log <- aov(mililitros_log ~ liquido * area*material, data = datos)
+summary(modelo_log)
+```
+
+## Conclusiones de la ANOVA AOV
+
+Los efectos principales Liquido, Área y Material tienen una influencia grande en la variable respuesta la cual es Mililitros debido a que todas las variables tienen un valor p de \<2e-16 todas y cada una de ellas, lo cual nos indica que todas tienen un efecto significativo sobre la variable respuesta.
+
+```{r}
+model1e <- model.tables(modelo_log,type='effects')
+model1e
+```
+
+### Liquido:
+
+El Aceite tiene un efecto negativo pero significativo en la variable respuesta, con un valor de -0.31, lo cual nos indica que esta reduce la variable respuesta (mililitros), esto se puede deber a su viscosidad, debido a que este tipo de líquidos tienden a fluir, absorber, dispersarse y movilizarse menos, y más aún en este experimento que es basado en la absorción de líquidos. Mientras que el agua con 0.1635 y el vinagre con 0.1547 tienen efectos positivos, lo cual nos indica que el agua y el vinagre contribuyen a que incremente la variable respuesta, esto debido a que son líquidos menos viscosos y por ende tienen más facilidad para absorberse.
+
+####Área Los diferentes tipos de materiales absorbentes fueron cortados en cuadrados de distintos tamaños, siendo el más pequeño de 5x5 cm, lo que corresponde a un área de 25 cm². Este presenta un efecto negativo en la variable respuesta de -1.69. Esto podría deberse a que al ser tan reducido el área, no puede absorber grandes cantidades de líquido debido a la limitación del espacio disponible. Mientras que los cuadrados de 100 cm² con 0.28 y 400 cm² con 1.406 tienen un efecto positivo sobre la variable respuesta, siendo más notable en los de 400 cm². Esto se puede debe a que, al tener un mayor tamaño, pueden abarcar una mayor cantidad de líquido, lo que les permite absorber más mililitros.
+
+### Material de absorción
+
+La hoja de papel de cuaderno tiene un efecto negativo sobre la variable respuesta (mililitros) con un valor de -1.26. Esto se puede deber a la finalidad con la que está hecha y su estructura de porosidad. El papel de cuaderno está diseñado principalmente para escribir sobre él, no para absorber líquidos, por lo que su superficie es relativamente lisa y compacta. A diferencia de otros tipos de papel, que están fabricados con fibras más entrelazadas y porosas, lo cual permite una absorción rápida y eficiente. Mientras que el papel de cocina con 0.46 y la servilleta con 0.8 afectan positivamente a la variable respuesta de mililitros absorbidos, esto puede deberse a la porosidad de los materiales, los cuales están diseñados para limpiar y absorber líquidos de manera eficiente. La diferencia en absorción entre ambos materiales puede explicarse por la mayor porosidad de la servilleta.
+
+### Interacciones:Líquido y Área
+
+El aceite muestra valores positivos en las áreas de 25 cm² (0.045) y 100 cm² (0.129), pero negativo en el área de 400 cm² (-0.174), lo que indica que su efecto es mayor en áreas pequeñas. El agua, por su parte, tiene un valor positivo en las áreas de 25 cm² (0.012) y 400 cm² (0.14), pero negativo en el área de 100 cm² (-0.15), lo que sugiere que su interacción no depende directamente del área. El vinagre presenta un comportamiento negativo en el área de 25 cm² (-0.05830) y positivo en las áreas de 100 cm² (0.02822) y 400 cm² (0.03008), lo que sugiere que su interacción con el área varía según el tamaño de la superficie.
+
+### Líquido y Material
+
+El aceite presenta una interacción negativa con la hoja de papel (-0.22), pero positiva con el papel cocina (0.13) y la servilleta (0.09), lo que sugiere que tiene mayor absorción a los materiales porosos. En cuanto al agua, muestra una interacción positiva con la hoja de papel (0.155), negativa con el papel cocina (-0.154) y con la servilleta (-0.00084), lo que indica que el agua es más absorbida por la hoja de papel. Por último, el vinagre tiene valores positivos tanto con la hoja de papel (0.07291) como con el papel cocina (0.01796), pero negativo con la servilleta (-0.09088), lo que demuestra que su comportamiento varía según el material con el que entra en contacto.
+
+### Área y Material
+
+La hoja de papel muestra un valor positivo en el área de 25 cm² (0.276, pero negativo en el área de 100 cm² (-0.39) y positivo en el área de 400 cm² (0.11), lo que indica que su interacción es más fuerte en áreas pequeñas y disminuye en áreas grandes. El papel cocina tiene un valor negativo en el área de 25 cm² (-0.05), positivo en el área de 100 cm² (0.25) y negativo en el área de 400 cm² (-0.19), lo que sugiere que su interacción aumenta en áreas medianas. La servilleta muestra un valor negativo en el área de 25 cm² (-0.22), positivo en el área de 100 cm² (0.14) y positivo también en el área de 400 cm² (0.08), lo que indica que aumenta en áreas grandes.
+
+## VALIDACIÓN
+
+#### Normalidad:
+
+Para que los resultados del modelo sean válidos y las inferencias estadísticas sean precisas los residuos deben seguir una distribución normal. Esto lo podemos ver por medio de diferentes pruebas estadísticas, en este caso usamos la prueba de Shapiro-Wilk.
+
+```{r}
+shapiro.test(residuals(modelo_log))
+```
+
+Dado que el valor-p es mayor que el grado de significancia, los residuales si presentan una distribución normal.
+
+#### Homocedasticidad:
+
+La homocedasticidad hace referencia a que los residuales tengan una varianza constante, en caso de que no lo sean esto podría afectar la validez de los resultados del modelo. Para detectar si los residuales presentan homocedasticidad existen diferentes alternativas como los gráficos de dispersión o algunas pruebas estadísticas. En este caso hicimos uso de la prueba de Breusch-Pagan.
+
+```{r}
+bptest(modelo_log)
+
+```
+
+Esta prueba también nos arrojó un valor-p mayor al grado de significancia por lo cual los residuales si presentan homocedasticidad.
+
+#### Independencia
+
+La independencia de los residuos hace referencia a que los residuales del modelo no están correlacionados entre sí. Lo cual indica que el error de predicción en un punto de datos no debe influir en el error de predicción en otro punto de datos. Para detectar esta indeoendecia se pueden realizar diferentes pruebas o graficos, en este caso usamos la prueba Durbin-Watson.
+
+```{r}
+dwtest(modelo_log,alternative="two.sided")
+```
+
+Por medio del valor-p podemos confirmar que los residuales si presentan independencia
+
+## MEJOR TRATAMIENTO
+
+Para obtener el mejor tratamiento se precisó de un estudio exhaustivo en donde se usaron las funciones LSD y Tukey, adicionalmente, se presentan graficos de superficie de respuesta que muestran los valores obtenidos de forma grafica
+
+Haciendo uso de ambas funciones podemos notar que la diferencia de medias nos ofrece un panorama muy acertado en cuanto a lo conocido de forma empirca. El material "Servilleta" y "Hoja de papel" Son aquellos que muestran una diferencia de medias más competente en el análisis en función de maximizar la cantidad de liquido absorbido.
+
+```{r}
+TukeyHSD(modelo_log,"material")
+```
+
+La prueba de Tukey nos muestra que el liquido que mejor responde al experimento es el agua y el aceite, esto se puede deber gracias a que las moleculas del agua penetran de forma uniforme en la superficie del material, el vinagre al ser un acido puede presentar disformidad en esta interacción con el material, lo cual se puede traducir en una menor capacidad de absorción, por otro lado, el aceite sorpresivamente presentó mejor desempeño en las pruebas, pero esto puede orientarse por su viscocidad y alta densidad en comparación al agua.
+
+```{r}
+TukeyHSD(modelo_log,"liquido")
+```
+
+El Area nos presenta a 400cm\^2 como la mejor opción para maximizar la cantidad de liquido, como era de esperarse.
+
+```{r}
+TukeyHSD(modelo_log,"area")
+```
+
+Aquí podemos ver de forma más clara las interacciónes pertinentes al análisis previo, en donde se puede ver la cantidad media de cada trio, en orden decendente de ml absorbidos. Siendo así el tratamiento Agua-Servilleta-400cm\^2 la mejor opción a escoger para maximizar la cantidad de liquido absorbido.
+
+```{r}
+datos$mililitros_log_pred <- predict(modelo_log, newdata = datos)
+
+datos$mililitros_pred <- exp(datos$mililitros_log_pred)
+
+mejores_tratamientos <- datos %>%
+  group_by(liquido, material, area) %>%
+  summarise(promedio_mililitros_pred = mean(mililitros_pred, na.rm = TRUE)) %>%
+  arrange(desc(promedio_mililitros_pred))  # Ordenar de mayor a menor
+
+print(head(mejores_tratamientos))
+```
+
+Para el grafico de superficie de respuesta se utilizó el modelo de regresión usando la función "lm" del paquete "lmtest", en donde se precisó de una codificación de la base de datos, asignando valores de -1, 0 y 1, la finalidad de este procedimiento era encontrar una ecuación que se ajustase al mejor tratamiento y así poder graficar las superficies de refuesta más adecuadas para los resultados, con los datos obtenidos se construyó la siguiente ecuación.
+
+ygorro \<- 0.9 + 0.240864*a + 1.551753*b + 0.867823*c + 0.088048*a*b - 0.168937*a*c + 0.003495*b*c + 0.026181*a*b*c
+
+Esta ecuación nos permite realizar las graficas de superficie que se presentan a continuación.
+
+### Grafico Liquido vs Area
+
+```{r}
+x     <-  seq(-1, 1, 0.1) # x=Liquido
+y     <-  seq(-1, 1, 0.1) # y=Area
+model <-  function (x, y){ 0.9 + 0.240864*x + 1.551753*y + 0.088048*x*y}
+z     <-  outer(x, y ,model)
+
+library(plotly)
+fig <- plot_ly(x=x, y=y, z=z)
+fig <- fig %>% add_surface()
+fig
+
+
+```
+
+Notese que los ejes "X" e "Y" tienen valores minimos y maximos de -1 y 1 respectivamente, recordemos que esto es por la codificación dada, en este caso se leería tal que X = Liquido, Y = material y los valores de 1 = Agua , 0 = Vinagre y -1 = aceite; así mismo para el material, resultando en que el mejor tratamiento es agua-servilleta-400cm\^2 como se había obtenido de forma númerica previamente.
+
+## CANTIDAD DE REPLICAS
+
+El análisis del número de réplicas en el experimento muestra que, con las 27 réplicas que se usaron, la probabilidad de detectar diferencias reales (la potencia estadística) es muy baja, apenas del 1.3%. Esto significa que el experimento tiene muy poca capacidad para encontrar resultados significativos, en caso de que existan.
+
+Si quisiéramos tener un 90% de probabilidad de detectar diferencias reales, sería necesario usar al menos 129 réplicas. Esto indica que, para mejorar la confiabilidad de los resultados, sería importante aumentar mucho más la cantidad de réplicas en futuros experimentos.
+
+```{r}
+require(pwr2)
+u<-27
+D<-0.487
+alphaa<-0.64
+
+fi<-((D^2)/(2*u*alphaa^2))
+
+
+#Calculando la potencia actual
+potencia_actual<-pwr.anova.test(f=sqrt(fi),k = 27, n=3,sig.level = 0.01)
+potencia_actual  #El power actual, es de 0.01304467
+
+#Ahora, probando con un power de 90%
+pwr.anova.test(f=sqrt(fi),k=27 ,power= 0.90, sig.level= 0.01)
+#Para poder alcanzar una potencia del 90% se requieren 129 replicas
+```
+
+## Conclusiones
+
+### 1)
+
+Dentro del ambito insdustrial la capacidad de secado en condiciones de alta humedad es crucial para un sostenimiento eficiente de un ambiente laboral seguro y sano para los trabajadores, con este estudio pudimos llegar a la conclusión de que las servilletas con un tamaño de 20x20 cm maximizan la absoción de liquido, especialmente si se trata de agua, sin embargo, siguen siendo muy superiores a su competencia aunque se trate de liquidos como el vinagre o aceite.
+
+### 2)
+
+Basándonos en el resultado propuesto, podemos concluir que el material que muestra la mayor capacidad de absorción en mililitros es la servilleta de tamaño 20x20 cm cuando se utiliza agua como líquido.
+
+Esta conclusión puede justificarse por varios factores:
+
+Composición del material de absorción: Las servilletas suelen estar diseñadas específicamente para absorber líquidos rápidamente, gracias a su estructura porosa y su capacidad de retener grandes volúmenes en comparación con otros materiales como hojas de papel o papel de cocina.
+
+Tamaño del material: Un mayor tamaño (20x20 cm) incrementa la superficie de contacto con el líquido, lo que favorece una absorción más eficiente.
+
+Naturaleza del líquido: El agua tiene menor viscosidad en comparación con el aceite, lo que facilita su absorción dentro del material .
+
+Este resultado tiene aplicaciones prácticas importantes, ya que destaca que las servilletas grandes son las más efectivas para absorber agua, lo que las hace ideales para situaciones que requieren limpieza rápida o absorción eficiente en el ámbito doméstico o en el industrial.
+
+### 3)
+
+La importancia de aumentar las réplicas para mejorar la validez experimental: El estudio reveló que, con las 27 réplicas utilizadas, la potencia estadística del experimento fue muy baja (1.3%), lo que limita la capacidad de detectar diferencias significativas entre tratamientos. Para alcanzar un nivel aceptable de confianza (90%), sería necesario incrementar el número de réplicas a al menos 129. Esto subraya la importancia de diseñar experimentos con suficiente poder estadístico para garantizar resultados confiables, especialmente en contextos donde las decisiones basadas en estos datos tienen implicaciones económicas o operativas significativas.
+
+## Referecias
+
+[@ggplot2][@lmtest; @dplyr; @agricolae; @readxl; @readr; @nortest; @plotly; @scatterplot3d; @gplots][@car; @pwr]
